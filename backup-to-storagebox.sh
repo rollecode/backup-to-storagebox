@@ -5,7 +5,7 @@
 # Example: ./backup-to-storagebox.sh / /backups/myserver/linux
 
 # Set version
-VERSION_SCRIPT="2.9.0"
+VERSION_SCRIPT="3.0.0"
 
 set -euo pipefail
 
@@ -80,7 +80,7 @@ load_config() {
   RSYNC_MAX_SIZE="${RSYNC_MAX_SIZE:-2G}"
   RSYNC_TIMEOUT="${RSYNC_TIMEOUT:-300}"
   EXCLUDES="${EXCLUDES:-}"  # Comma-separated list of exclude patterns (empty = no excludes)
-  RSYNC_DELETE="${RSYNC_DELETE:-false}"     # true = mirror source deletions and purge already-synced excluded files
+  RSYNC_DELETE="${RSYNC_DELETE:-true}"      # true (default) = mirror source deletions and purge already-synced excluded files; set false for append-only
   RSYNC_MAX_DELETE="${RSYNC_MAX_DELETE:-}"  # optional safety cap on number of deletions per run (empty = no cap)
   DRY_RUN="${DRY_RUN:-false}"               # true = show what would change (incl. deletions) without touching the backup
 

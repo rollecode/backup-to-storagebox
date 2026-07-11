@@ -1,3 +1,7 @@
+### 3.0.0: 2026-07-11
+
+* Make `RSYNC_DELETE` default to true so backups mirror source deletions out of the box and no longer grow without bound (set `RSYNC_DELETE=false` for the old append-only behaviour)
+
 ### 2.9.0: 2026-07-11
 
 * Add `RSYNC_DELETE` mode (`--delete --delete-excluded`) to mirror source deletions and purge already-synced excluded files, preventing unbounded backup growth
