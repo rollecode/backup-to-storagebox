@@ -1,6 +1,6 @@
 # 🚀 Backup to Storagebox
 
-![Version](https://img.shields.io/badge/version-2.8.1-blue?style=for-the-badge) ![Hetzner](https://img.shields.io/badge/hetzner-%23d50c2d.svg?style=for-the-badge&logo=hetzner&logoColor=white) ![Better Stack](https://img.shields.io/badge/Better%20Stack-%235b63d3.svg?style=for-the-badge&logo=betterstack&logoColor=white) ![Rsync](https://img.shields.io/badge/rsync-%23FF6B35.svg?style=for-the-badge&logo=rsync&logoColor=white) ![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&color=%23222222&logo=gnu-bash&logoColor=white) 
+![Version](https://img.shields.io/badge/version-2.9.0-blue?style=for-the-badge) ![Hetzner](https://img.shields.io/badge/hetzner-%23d50c2d.svg?style=for-the-badge&logo=hetzner&logoColor=white) ![Better Stack](https://img.shields.io/badge/Better%20Stack-%235b63d3.svg?style=for-the-badge&logo=betterstack&logoColor=white) ![Rsync](https://img.shields.io/badge/rsync-%23FF6B35.svg?style=for-the-badge&logo=rsync&logoColor=white) ![Bash](https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&color=%23222222&logo=gnu-bash&logoColor=white) 
 
 A simple, fast backup script for Hetzner Storageboxes.
 
@@ -29,8 +29,10 @@ cp .env.example .env
 - `RSYNC_MAX_SIZE` - Max file size (default: 2G)
 - `RSYNC_TIMEOUT` - Connection timeout (default: 300)
 - `RSYNC_BANDWIDTH_LIMIT` - Bandwidth limit (e.g., 1000 for 1MB/s)
+- `RSYNC_DELETE` - Set to 'true' to mirror source deletions and purge already-synced excluded files, so the backup does not grow without bound (default: false)
+- `RSYNC_MAX_DELETE` - Optional cap on deletions per run as a safety valve (default: none)
 - `BETTER_STACK_HEARTBEAT` - Better Stack heartbeat URL for monitoring
-- `DRY_RUN` - Set to 'true' for dry run
+- `DRY_RUN` - Set to 'true' for dry run (preview changes and deletions without touching the backup)
 
 ## 🔧 Features
 

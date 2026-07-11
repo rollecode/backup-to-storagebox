@@ -1,3 +1,10 @@
+### 2.9.0: 2026-07-11
+
+* Add `RSYNC_DELETE` mode (`--delete --delete-excluded`) to mirror source deletions and purge already-synced excluded files, preventing unbounded backup growth
+* Add `RSYNC_MAX_DELETE` safety cap for deletions per run
+* Implement `DRY_RUN` (was documented but had no effect) so changes and deletions can be previewed before enabling delete mode
+* Harden default excludes with lost+found, swapfile, swap.img and editor swap files
+
 ### 2.8.1: 2025-09-16
 
 * Fix color variables being referenced before definition

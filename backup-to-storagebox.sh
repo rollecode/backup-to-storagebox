@@ -5,7 +5,7 @@
 # Example: ./backup-to-storagebox.sh / /backups/myserver/linux
 
 # Set version
-VERSION_SCRIPT="2.8.1"
+VERSION_SCRIPT="2.9.0"
 
 set -euo pipefail
 
@@ -80,6 +80,9 @@ load_config() {
   RSYNC_MAX_SIZE="${RSYNC_MAX_SIZE:-2G}"
   RSYNC_TIMEOUT="${RSYNC_TIMEOUT:-300}"
   EXCLUDES="${EXCLUDES:-}"  # Comma-separated list of exclude patterns (empty = no excludes)
+  RSYNC_DELETE="${RSYNC_DELETE:-false}"     # true = mirror source deletions and purge already-synced excluded files
+  RSYNC_MAX_DELETE="${RSYNC_MAX_DELETE:-}"  # optional safety cap on number of deletions per run (empty = no cap)
+  DRY_RUN="${DRY_RUN:-false}"               # true = show what would change (incl. deletions) without touching the backup
 
   # Validate required variables
   if [[ -z "${STORAGEBOX_USER:-}" ]] || [[ -z "${STORAGEBOX_HOST:-}" ]]; then
@@ -177,6 +180,25 @@ opts+=(-e "ssh -o StrictHostKeyChecking=no -i $SSH_KEY_PATH -p $SSH_PORT")
 # Add bandwidth limit if specified
 if [[ -n "${RSYNC_BANDWIDTH_LIMIT:-}" ]]; then
   opts+=(--bwlimit="$RSYNC_BANDWIDTH_LIMIT")
+fi
+
+# Mirror deletions (opt-in). Without this the backup only ever grows: files
+# removed on the source stay forever, and once-synced paths that later match an
+# exclude are never purged. --delete removes vanished-from-source files;
+# --delete-excluded purges already-synced files that now match an exclude.
+# Safe alongside --max-size: that is a transfer rule, so oversized files still
+# in the file list (e.g. large .git packs) are never deleted.
+if [[ "${RSYNC_DELETE,,}" == "true" ]]; then
+  opts+=(--delete --delete-excluded)
+  [[ -n "$RSYNC_MAX_DELETE" ]] && opts+=(--max-delete="$RSYNC_MAX_DELETE")
+  echo -e "${YELLOW}🗑️  Delete mode ON: backup mirrors source deletions${NC}"
+fi
+
+# Dry run: preview all changes (including deletions) without modifying the backup.
+# Strongly recommended before enabling RSYNC_DELETE on an existing backup.
+if [[ "${DRY_RUN,,}" == "true" ]]; then
+  opts+=(--dry-run)
+  echo -e "${YELLOW}🧪 DRY RUN: no files will be transferred or deleted${NC}"
 fi
 
 # Add excludes from environment variable (if not empty)
