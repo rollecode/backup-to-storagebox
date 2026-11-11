@@ -1,6 +1,7 @@
 ### 3.0.1: 2026-11-11
 
 * Fix missed heartbeats when files vanish mid-run
+* Add release workflow for new CHANGELOG versions
 
 ### 3.0.0: 2026-07-11
 

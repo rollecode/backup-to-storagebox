@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'CHANGELOG.md'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create release for the newest CHANGELOG version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -m1 '^### [0-9]' CHANGELOG.md | sed 's/### \([0-9.]*\).*/\1/')
+          [ -n "$VERSION" ] || exit 0
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION exists"
+            exit 0
+          fi
+          awk '/^### [0-9]/{if(p) exit; p=1} p' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          gh release create "$VERSION" --title "$VERSION" --notes-file "$RUNNER_TEMP/notes.md" --target "$GITHUB_SHA"
