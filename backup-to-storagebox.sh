@@ -5,7 +5,7 @@
 # Example: ./backup-to-storagebox.sh / /backups/myserver/linux
 
 # Set version
-VERSION_SCRIPT="3.0.0"
+VERSION_SCRIPT="3.0.1"
 
 set -euo pipefail
 
@@ -355,9 +355,9 @@ echo -e "${CYAN}═════════════════════�
 if [[ $exit_code -eq 0 ]]; then
   echo -e "${GREEN}🎉 Status: ${WHITE}Completed successfully${NC}"
   echo -e "${GREEN}✅ Result: ${WHITE}All files transferred without errors${NC}"
-elif [[ $exit_code -eq 23 ]]; then
+elif [[ $exit_code -eq 23 || $exit_code -eq 24 ]]; then
   echo -e "${GREEN}🎉 Status: ${WHITE}Completed with warnings${NC}"
-  echo -e "${YELLOW}⚠️ Result: ${WHITE}Some files/attributes were not transferred (ACL errors)${NC}"
+  echo -e "${YELLOW}⚠️ Result: ${WHITE}Some files/attributes were not transferred or vanished during the run${NC}"
   echo -e "${YELLOW}💡 Note: ${WHITE}This is normal for system backups - backup is successful${NC}"
 else
   echo -e "${RED}❌ Status: ${WHITE}Completed with errors${NC}"
@@ -379,16 +379,17 @@ if [[ -n "${BETTER_STACK_HEARTBEAT:-}" ]]; then
   # Send heartbeat only on success (Better Stack detects missing heartbeats as failures)
   if [[ -n "${exit_code:-}" ]]; then
     # Main backup was run, only send heartbeat on success
-    if [[ $exit_code -eq 0 || $exit_code -eq 23 ]]; then
-      # Success heartbeat (exit code 0 or 23 which is partial success)
+    # 23 = partial transfer, 24 = files vanished mid-run (live databases, torrents)
+    if [[ $exit_code -eq 0 || $exit_code -eq 23 || $exit_code -eq 24 ]]; then
       if curl -fsS -m 10 --retry 3 "$BETTER_STACK_HEARTBEAT" >/dev/null 2>&1; then
         echo -e "${GREEN}✅ Heartbeat sent successfully${NC}"
       else
         echo -e "${YELLOW}⚠️ Failed to send heartbeat (backup still completed)${NC}"
       fi
     else
-      # Skip heartbeat on failure - Better Stack will detect missing heartbeat as failure
-      echo -e "${YELLOW}⚠️ Backup failed with exit code $exit_code - no heartbeat sent${NC}"
+      # Better Stack opens an incident naming the exit code
+      curl -fsS -m 10 --retry 3 "$BETTER_STACK_HEARTBEAT/$exit_code" >/dev/null 2>&1 || true
+      echo -e "${YELLOW}⚠️ Backup failed with exit code $exit_code - failure reported to Better Stack${NC}"
     fi
   else
     # Main backup was disabled, send success heartbeat for crontab backup

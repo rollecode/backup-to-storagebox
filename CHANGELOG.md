@@ -1,3 +1,7 @@
+### 3.0.1: 2026-11-11
+
+* Fix missed heartbeats when files vanish mid-run
+
 ### 3.0.0: 2026-07-11
 
 * Make `RSYNC_DELETE` default to true so backups mirror source deletions out of the box and no longer grow without bound (set `RSYNC_DELETE=false` for the old append-only behaviour)
