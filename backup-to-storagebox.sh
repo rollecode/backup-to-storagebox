@@ -387,8 +387,12 @@ if [[ -n "${BETTER_STACK_HEARTBEAT:-}" ]]; then
         echo -e "${YELLOW}⚠️ Failed to send heartbeat (backup still completed)${NC}"
       fi
     else
-      # Better Stack opens an incident naming the exit code
-      curl -fsS -m 10 --retry 3 "$BETTER_STACK_HEARTBEAT/$exit_code" >/dev/null 2>&1 || true
+      # Report the exit code: Uptime Kuma push URLs take it as a query, Better Stack as a path
+      fail_url="$BETTER_STACK_HEARTBEAT/$exit_code"
+      if [[ "$BETTER_STACK_HEARTBEAT" == */api/push/* ]]; then
+        fail_url="${BETTER_STACK_HEARTBEAT%%\?*}?status=down&msg=exit+code+$exit_code"
+      fi
+      curl -fsS -m 10 --retry 3 "$fail_url" >/dev/null 2>&1 || true
       echo -e "${YELLOW}⚠️ Backup failed with exit code $exit_code - failure reported to Better Stack${NC}"
     fi
   else

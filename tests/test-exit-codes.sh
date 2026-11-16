@@ -28,4 +28,9 @@ check 23 "https://hb.example/x"
 check 24 "https://hb.example/x"
 check 12 "https://hb.example/x/12"
 
+# Uptime Kuma push URL
+sed -i 's|^BETTER_STACK_HEARTBEAT=.*|BETTER_STACK_HEARTBEAT=https://kuma.example/api/push/t?status=up|' .env
+check 0 "https://kuma.example/api/push/t?status=up"
+check 12 "https://kuma.example/api/push/t?status=down&msg=exit+code+12"
+
 exit $FAIL

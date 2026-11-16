@@ -1,3 +1,7 @@
+### 3.1.0: 2026-11-16
+
+* Add Uptime Kuma push URL failure reports
+
 ### 3.0.1: 2026-11-11
 
 * Fix missed heartbeats when files vanish mid-run
