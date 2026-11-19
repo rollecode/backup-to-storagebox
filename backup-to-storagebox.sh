@@ -5,7 +5,7 @@
 # Example: ./backup-to-storagebox.sh / /backups/myserver/linux
 
 # Set version
-VERSION_SCRIPT="3.0.1"
+VERSION_SCRIPT="3.1.1"
 
 set -euo pipefail
 
@@ -214,6 +214,12 @@ fi
 
 # Backup crontabs
 backup_crontabs() {
+  # A backup of / already holds /var/spool/cron, and its read-only root refuses a crontabs/ dir
+  if [[ "$SOURCE_PATH" == "/" ]]; then
+    echo -e "${CYAN}📅 Crontabs are in the backup of /${NC}"
+    return
+  fi
+
   if [[ $EUID -eq 0 ]]; then
     echo -e "${CYAN}📅 Backing up crontabs (root mode)...${NC}"
     local crontab_dir="/tmp/crontab-backup-$(date +%Y%m%d-%H%M%S)"

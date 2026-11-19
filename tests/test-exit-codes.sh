@@ -10,7 +10,7 @@ printf 'STORAGEBOX_USER=u\nSTORAGEBOX_HOST=h\nSSH_KEY_PATH=%s/key\nBETTER_STACK_
 touch "$TMP/key"
 mkdir "$TMP/bin" "$TMP/src"
 for c in sftp crontab; do printf '#!/bin/bash\nexit 0\n' > "$TMP/bin/$c"; done
-printf '#!/bin/bash\nexit "$FAKE_RSYNC_CODE"\n' > "$TMP/bin/rsync"
+printf '#!/bin/bash\necho "$*" >> "${RSYNC_LOG:-/dev/null}"\nexit "${FAKE_RSYNC_CODE:-0}"\n' > "$TMP/bin/rsync"
 printf '#!/bin/bash\necho "${@: -1}" >> "$CURL_LOG"\n' > "$TMP/bin/curl"
 chmod +x "$TMP/bin"/*
 
@@ -32,5 +32,10 @@ check 12 "https://hb.example/x/12"
 sed -i 's|^BETTER_STACK_HEARTBEAT=.*|BETTER_STACK_HEARTBEAT=https://kuma.example/api/push/t?status=up|' .env
 check 0 "https://kuma.example/api/push/t?status=up"
 check 12 "https://kuma.example/api/push/t?status=down&msg=exit+code+12"
+
+# A backup of / already holds /var/spool/cron, and its read-only root refuses a crontabs/ dir
+: > "$TMP/rsync.log"
+RSYNC_LOG="$TMP/rsync.log" PATH="$TMP/bin:$PATH" bash backup-to-storagebox.sh / /backups/t >/dev/null 2>&1
+if grep -q "crontabs/" "$TMP/rsync.log"; then echo "FAIL source / still uploads crontabs separately"; FAIL=1; else echo "ok   source / skips the separate crontab upload"; fi
 
 exit $FAIL

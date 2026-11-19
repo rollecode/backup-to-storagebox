@@ -1,3 +1,7 @@
+### 3.1.1: 2026-11-19
+
+* Fix failing crontab upload when backing up /
+
 ### 3.1.0: 2026-11-16
 
 * Add Uptime Kuma push URL failure reports
